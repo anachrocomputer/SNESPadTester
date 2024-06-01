@@ -47,7 +47,7 @@ void setup(void)
 void loop(void)
 {
   for (;;) {
-    const unsigned int snesbits = readSNES();
+    const unsigned long int snesbits = readSNES(16);
 
     Serial.print(snesbits, BIN);
     Serial.print(" ");
@@ -56,19 +56,18 @@ void loop(void)
 
     delay(20);
   }
-
 }
 
 
 /* readSNES --- read the SNES controller */
 
-unsigned int readSNES(void)
+unsigned long int readSNES(const unsigned int bits)
 {
   // With digitalRead/digitalWrite: 150us
   // With direct port I/O: 24us
 //unsigned long int before, after;
-  unsigned int snesbits = 0;
-  int i;
+  unsigned long int snesbits = 0L;
+  unsigned int i;
   
 //before = micros();
   
@@ -76,9 +75,9 @@ unsigned int readSNES(void)
   digitalWrite(LATCH_PIN, HIGH);
   digitalWrite(LATCH_PIN, LOW);
   
-  for (i = 0; i < 12; i++) {
+  for (i = 0; i < bits; i++) {
     if (digitalRead(DATA_PIN) == LOW)
-      snesbits |= (1 << i);
+      snesbits |= (1L << i);
       
     digitalWrite(CLOCK_PIN, HIGH);
     digitalWrite(CLOCK_PIN, LOW);
@@ -88,11 +87,11 @@ unsigned int readSNES(void)
   delayMicroseconds(2);
   SNESOUT &= ~LATCH_BIT;
   
-  for (i = 0; i < 12; i++) {
+  for (i = 0; i < bits; i++) {
     delayMicroseconds(2);
     
     if ((SNESIN & DATA_BIT) == 0)
-      snesbits |= (1 << i);
+      snesbits |= (1L << i);
       
     SNESOUT |= CLOCK_BIT;
     delayMicroseconds(2);
